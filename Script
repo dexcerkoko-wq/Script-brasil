@@ -1,4 +1,4 @@
--- LocalScript - Teleporte + Noclip + Velocidade
+-- LocalScript - Teleporte em linha +2, Noclip e Velocidade
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -6,7 +6,6 @@ local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 
--- Espera o personagem carregar
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 local root = character:WaitForChild("HumanoidRootPart")
@@ -14,7 +13,7 @@ local root = character:WaitForChild("HumanoidRootPart")
 -- =========================
 -- VELOCIDADE ALTA
 -- =========================
-humanoid.WalkSpeed = 80 -- padrão é 16, você pode aumentar mais se quiser
+humanoid.WalkSpeed = 80
 
 -- =========================
 -- NOCLIP
@@ -28,22 +27,27 @@ RunService.Stepped:Connect(function()
 end)
 
 -- =========================
--- PRINT DA POSIÇÃO
+-- POSIÇÕES EM LINHA (+2)
 -- =========================
-print("Posição inicial:", root.Position)
+local startPosition = Vector3.new(-470, -6, 221) -- posição inicial
+local totalPoints = 8 -- quantidade de pontos
+local step = 2 -- valor do +2
+
+local teleportPoints = {}
+
+for i = 0, totalPoints - 1 do
+	table.insert(teleportPoints, startPosition + Vector3.new(step * i, 0, 0))
+end
 
 -- =========================
--- TELEPORTES
+-- TELEPORTE
 -- =========================
-local teleportPoints = {
-	Vector3.new(-470, -6, 221),
-	Vector3.new(-471, -6, 112)
-}
-
 local index = 1
 
 local function teleport()
 	root.CFrame = CFrame.new(teleportPoints[index])
+
+	print("Teleportado para:", teleportPoints[index])
 
 	index += 1
 	if index > #teleportPoints then
