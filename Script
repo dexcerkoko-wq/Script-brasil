@@ -1,10 +1,39 @@
--- LocalScript - Teleporte em sequência + volta + Noclip + Velocidade (VERSÃO CORRIGIDA)
+-- Rayfield UI + Teleporte + Speed + Jump + Noclip (COM MENU)
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local root = character:WaitForChild("HumanoidRootPart")
+
+-- =========================
+-- RAYFIELD UI
+-- =========================
+local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Rayfield/main/source"))()
+
+local Window = Rayfield:CreateWindow({
+	Name = "Dexcer Menu",
+	LoadingTitle = "Dexcer Hub",
+	LoadingSubtitle = "Teleport + Speed + Noclip",
+	ConfigurationSaving = {
+		Enabled = false
+	}
+})
+
+local MainTab = Window:CreateTab("Player", 4483362458)
+
+-- =========================
+-- VARIÁVEIS
+-- =========================
+local walkSpeed = 80
+local jumpPower = 80
+local noclip = true
+local tpDelay = 0.25
+local teleportKey = Enum.KeyCode.K
+local debounce = false
 
 -- =========================
 -- SUAS COORDENADAS
@@ -20,76 +49,408 @@ local teleportPoints = {
 	Vector3.new(-470, -6, 220)
 }
 
-local debounce = false
-local humanoid
-local root
-local noclipConnection
-
 -- =========================
--- FUNÇÃO QUANDO O PLAYER NASCER
+-- NOCLIP LOOP
 -- =========================
-local function setupCharacter(character)
-	humanoid = character:WaitForChild("Humanoid")
-	root = character:WaitForChild("HumanoidRootPart")
-
-	-- VELOCIDADE
-	humanoid.WalkSpeed = 80
-
-	-- NOCLIP REAL
-	if noclipConnection then
-		noclipConnection:Disconnect()
-	end
-
-	noclipConnection = RunService.Stepped:Connect(function()
-		if character and character.Parent then
-			for _, part in ipairs(character:GetChildren()) do
-				if part:IsA("BasePart") then
-					part.CanCollide = false
-				end
+RunService.Stepped:Connect(function()
+	if noclip and character then
+		for _, part in ipairs(character:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = false
 			end
 		end
-	end)
-end
-
--- Primeira vez
-if player.Character then
-	setupCharacter(player.Character)
-end
-
--- Sempre que respawnar
-player.CharacterAdded:Connect(setupCharacter)
+	end
+end)
 
 -- =========================
--- TELEPORTE EM SEQUÊNCIA E VOLTA
+-- TELEPORTE EM SEQUÊNCIA
 -- =========================
 local function teleportSequence()
-	if debounce or not root then return end
+	if debounce then return end
 	debounce = true
 
 	local originalCFrame = root.CFrame
 
 	for _, pos in ipairs(teleportPoints) do
-		if root then
-			root.CFrame = CFrame.new(pos)
-			task.wait(0.25)
-		end
+		root.CFrame = CFrame.new(pos)
+		task.wait(tpDelay)
 	end
 
-	task.wait(0.25)
-
-	if root then
-		root.CFrame = originalCFrame
-	end
-
+	root.CFrame = originalCFrame
 	debounce = false
 end
 
 -- =========================
--- TECLA K
+-- TECLA DE TELEPORTE
 -- =========================
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then return end
-	if input.KeyCode == Enum.KeyCode.K then
+	if input.KeyCode == teleportKey then
 		teleportSequence()
 	end
 end)
+
+-- =========================
+-- CONTROLES NO MENU
+-- =========================
+
+MainTab:CreateSlider({
+	Name = "Velocidade",
+	Range = {16, 200},
+	Increment = 1,
+	CurrentValue = 80,
+	Callback = function(Value)
+		walkSpeed = Value
+		humanoid.WalkSpeed = walkSpeed
+	end,
+})
+
+MainTab:CreateSlider({
+	Name = "Força do Pulo",
+	Range = {50, 200},
+	Increment = 1,
+	CurrentValue = 80,
+	Callback = function(Value)
+		jumpPower = Value
+		humanoid.JumpPower = jumpPower
+	end,
+})
+
+MainTab:CreateSlider({
+	Name = "Velocidade do Teleporte",
+	Range = {0.05, 1},
+	Increment = 0.05,
+	CurrentValue = 0.25,
+	Callback = function(Value)
+		tpDelay = Value
+	end,
+})
+
+MainTab:CreateToggle({
+	Name = "Noclip",
+	CurrentValue = true,
+	Callback = function(Value)
+		noclip = Value
+	end,
+})
+
+MainTab:CreateKeybind({
+	Name = "Tecla do Teleporte",
+	CurrentKeybind = "K",
+	HoldToInteract = false,
+	Callback = function(Key)
+		teleportKey = Key
+	end,
+})
+
+-- =========================
+-- APLICA STATUS INICIAL
+-- =========================
+humanoid.WalkSpeed = walkSpeed
+humanoid.JumpPower = jumpPower
+
+print("Menu carregado com sucesso.")
+-- Rayfield UI + Teleporte + Speed + Jump + Noclip (COM MENU)
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local root = character:WaitForChild("HumanoidRootPart")
+
+-- =========================
+-- RAYFIELD UI
+-- =========================
+local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Rayfield/main/source"))()
+
+local Window = Rayfield:CreateWindow({
+	Name = "Dexcer Menu",
+	LoadingTitle = "Dexcer Hub",
+	LoadingSubtitle = "Teleport + Speed + Noclip",
+	ConfigurationSaving = {
+		Enabled = false
+	}
+})
+
+local MainTab = Window:CreateTab("Player", 4483362458)
+
+-- =========================
+-- VARIÁVEIS
+-- =========================
+local walkSpeed = 80
+local jumpPower = 80
+local noclip = true
+local tpDelay = 0.25
+local teleportKey = Enum.KeyCode.K
+local debounce = false
+
+-- =========================
+-- SUAS COORDENADAS
+-- =========================
+local teleportPoints = {
+	Vector3.new(-347, -6, 113),
+	Vector3.new(-347, -6, 218),
+	Vector3.new(-346, -6, 10),
+	Vector3.new(-347, -6, -97),
+	Vector3.new(-470, -6, -102),
+	Vector3.new(-471, -6, 2),
+	Vector3.new(-470, -6, 114),
+	Vector3.new(-470, -6, 220)
+}
+
+-- =========================
+-- NOCLIP LOOP
+-- =========================
+RunService.Stepped:Connect(function()
+	if noclip and character then
+		for _, part in ipairs(character:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = false
+			end
+		end
+	end
+end)
+
+-- =========================
+-- TELEPORTE EM SEQUÊNCIA
+-- =========================
+local function teleportSequence()
+	if debounce then return end
+	debounce = true
+
+	local originalCFrame = root.CFrame
+
+	for _, pos in ipairs(teleportPoints) do
+		root.CFrame = CFrame.new(pos)
+		task.wait(tpDelay)
+	end
+
+	root.CFrame = originalCFrame
+	debounce = false
+end
+
+-- =========================
+-- TECLA DE TELEPORTE
+-- =========================
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if input.KeyCode == teleportKey then
+		teleportSequence()
+	end
+end)
+
+-- =========================
+-- CONTROLES NO MENU
+-- =========================
+
+MainTab:CreateSlider({
+	Name = "Velocidade",
+	Range = {16, 200},
+	Increment = 1,
+	CurrentValue = 80,
+	Callback = function(Value)
+		walkSpeed = Value
+		humanoid.WalkSpeed = walkSpeed
+	end,
+})
+
+MainTab:CreateSlider({
+	Name = "Força do Pulo",
+	Range = {50, 200},
+	Increment = 1,
+	CurrentValue = 80,
+	Callback = function(Value)
+		jumpPower = Value
+		humanoid.JumpPower = jumpPower
+	end,
+})
+
+MainTab:CreateSlider({
+	Name = "Velocidade do Teleporte",
+	Range = {0.05, 1},
+	Increment = 0.05,
+	CurrentValue = 0.25,
+	Callback = function(Value)
+		tpDelay = Value
+	end,
+})
+
+MainTab:CreateToggle({
+	Name = "Noclip",
+	CurrentValue = true,
+	Callback = function(Value)
+		noclip = Value
+	end,
+})
+
+MainTab:CreateKeybind({
+	Name = "Tecla do Teleporte",
+	CurrentKeybind = "K",
+	HoldToInteract = false,
+	Callback = function(Key)
+		teleportKey = Key
+	end,
+})
+
+-- =========================
+-- APLICA STATUS INICIAL
+-- =========================
+humanoid.WalkSpeed = walkSpeed
+humanoid.JumpPower = jumpPower
+
+print("Menu carregado com sucesso.")
+-- Rayfield UI + Teleporte + Speed + Jump + Noclip (COM MENU)
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local root = character:WaitForChild("HumanoidRootPart")
+
+-- =========================
+-- RAYFIELD UI
+-- =========================
+local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Rayfield/main/source"))()
+
+local Window = Rayfield:CreateWindow({
+	Name = "Dexcer Menu",
+	LoadingTitle = "Dexcer Hub",
+	LoadingSubtitle = "Teleport + Speed + Noclip",
+	ConfigurationSaving = {
+		Enabled = false
+	}
+})
+
+local MainTab = Window:CreateTab("Player", 4483362458)
+
+-- =========================
+-- VARIÁVEIS
+-- =========================
+local walkSpeed = 80
+local jumpPower = 80
+local noclip = true
+local tpDelay = 0.25
+local teleportKey = Enum.KeyCode.K
+local debounce = false
+
+-- =========================
+-- SUAS COORDENADAS
+-- =========================
+local teleportPoints = {
+	Vector3.new(-347, -6, 113),
+	Vector3.new(-347, -6, 218),
+	Vector3.new(-346, -6, 10),
+	Vector3.new(-347, -6, -97),
+	Vector3.new(-470, -6, -102),
+	Vector3.new(-471, -6, 2),
+	Vector3.new(-470, -6, 114),
+	Vector3.new(-470, -6, 220)
+}
+
+-- =========================
+-- NOCLIP LOOP
+-- =========================
+RunService.Stepped:Connect(function()
+	if noclip and character then
+		for _, part in ipairs(character:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = false
+			end
+		end
+	end
+end)
+
+-- =========================
+-- TELEPORTE EM SEQUÊNCIA
+-- =========================
+local function teleportSequence()
+	if debounce then return end
+	debounce = true
+
+	local originalCFrame = root.CFrame
+
+	for _, pos in ipairs(teleportPoints) do
+		root.CFrame = CFrame.new(pos)
+		task.wait(tpDelay)
+	end
+
+	root.CFrame = originalCFrame
+	debounce = false
+end
+
+-- =========================
+-- TECLA DE TELEPORTE
+-- =========================
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if input.KeyCode == teleportKey then
+		teleportSequence()
+	end
+end)
+
+-- =========================
+-- CONTROLES NO MENU
+-- =========================
+
+MainTab:CreateSlider({
+	Name = "Velocidade",
+	Range = {16, 200},
+	Increment = 1,
+	CurrentValue = 80,
+	Callback = function(Value)
+		walkSpeed = Value
+		humanoid.WalkSpeed = walkSpeed
+	end,
+})
+
+MainTab:CreateSlider({
+	Name = "Força do Pulo",
+	Range = {50, 200},
+	Increment = 1,
+	CurrentValue = 80,
+	Callback = function(Value)
+		jumpPower = Value
+		humanoid.JumpPower = jumpPower
+	end,
+})
+
+MainTab:CreateSlider({
+	Name = "Velocidade do Teleporte",
+	Range = {0.05, 1},
+	Increment = 0.05,
+	CurrentValue = 0.25,
+	Callback = function(Value)
+		tpDelay = Value
+	end,
+})
+
+MainTab:CreateToggle({
+	Name = "Noclip",
+	CurrentValue = true,
+	Callback = function(Value)
+		noclip = Value
+	end,
+})
+
+MainTab:CreateKeybind({
+	Name = "Tecla do Teleporte",
+	CurrentKeybind = "K",
+	HoldToInteract = false,
+	Callback = function(Key)
+		teleportKey = Key
+	end,
+})
+
+-- =========================
+-- APLICA STATUS INICIAL
+-- =========================
+humanoid.WalkSpeed = walkSpeed
+humanoid.JumpPower = jumpPower
+
+print("Menu carregado com sucesso.")
