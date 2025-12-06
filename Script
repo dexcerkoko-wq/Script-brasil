@@ -1,64 +1,51 @@
--- LocalScript - Teleporte em linha +2, Noclip e Velocidade
+-- LocalScript - Teleporte em sequência e volta para a posição original
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 
 local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
 local root = character:WaitForChild("HumanoidRootPart")
 
--- =========================
--- VELOCIDADE ALTA
--- =========================
-humanoid.WalkSpeed = 80
+-- Lista das SUAS novas coordenadas
+local teleportPoints = {
+	Vector3.new(-347, -6, 113),
+	Vector3.new(-347, -6, 218),
+	Vector3.new(-346, -6, 10),
+	Vector3.new(-347, -6, -97),
+	Vector3.new(-470, -6, -102),
+	Vector3.new(-471, -6, 2),
+	Vector3.new(-470, -6, 114),
+	Vector3.new(-470, -6, 220)
+}
 
--- =========================
--- NOCLIP
--- =========================
-RunService.Stepped:Connect(function()
-	for _, part in ipairs(character:GetChildren()) do
-		if part:IsA("BasePart") then
-			part.CanCollide = false
-		end
+local debounce = false -- impede spam da tecla
+
+local function teleportSequence()
+	if debounce then return end
+	debounce = true
+
+	-- Salva posição original
+	local originalPosition = root.CFrame
+
+	-- Passa por todas as coordenadas
+	for _, pos in ipairs(teleportPoints) do
+		root.CFrame = CFrame.new(pos)
+		task.wait(0.3) -- tempo entre cada teleporte (ajuste se quiser)
 	end
-end)
 
--- =========================
--- POSIÇÕES EM LINHA (+2)
--- =========================
-local startPosition = Vector3.new(-470, -6, 221) -- posição inicial
-local totalPoints = 8 -- quantidade de pontos
-local step = 2 -- valor do +2
+	-- Volta para onde o player estava
+	task.wait(0.3)
+	root.CFrame = originalPosition
 
-local teleportPoints = {}
-
-for i = 0, totalPoints - 1 do
-	table.insert(teleportPoints, startPosition + Vector3.new(step * i, 0, 0))
-end
-
--- =========================
--- TELEPORTE
--- =========================
-local index = 1
-
-local function teleport()
-	root.CFrame = CFrame.new(teleportPoints[index])
-
-	print("Teleportado para:", teleportPoints[index])
-
-	index += 1
-	if index > #teleportPoints then
-		index = 1
-	end
+	debounce = false
 end
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then return end
 
 	if input.KeyCode == Enum.KeyCode.K then
-		teleport()
+		teleportSequence()
 	end
 end)
