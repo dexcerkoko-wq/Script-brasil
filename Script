@@ -1,29 +1,10 @@
--- LocalScript - Teleporte em sequência + volta + Noclip + Velocidade
+-- LocalScript - Teleporte em sequência + volta + Noclip + Velocidade (VERSÃO CORRIGIDA)
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local root = character:WaitForChild("HumanoidRootPart")
-
--- =========================
--- VELOCIDADE ALTA
--- =========================
-humanoid.WalkSpeed = 80 -- padrão é 16
-
--- =========================
--- NOCLIP
--- =========================
-RunService.Stepped:Connect(function()
-	for _, part in ipairs(character:GetChildren()) do
-		if part:IsA("BasePart") then
-			part.CanCollide = false
-		end
-	end
-end)
 
 -- =========================
 -- SUAS COORDENADAS
@@ -40,95 +21,65 @@ local teleportPoints = {
 }
 
 local debounce = false
--- LocalScript - Teleporte em sequência + volta + Noclip + Velocidade
-
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local root = character:WaitForChild("HumanoidRootPart")
+local humanoid
+local root
+local noclipConnection
 
 -- =========================
--- VELOCIDADE ALTA
+-- FUNÇÃO QUANDO O PLAYER NASCER
 -- =========================
-humanoid.WalkSpeed = 80 -- padrão é 16
+local function setupCharacter(character)
+	humanoid = character:WaitForChild("Humanoid")
+	root = character:WaitForChild("HumanoidRootPart")
 
--- =========================
--- NOCLIP
--- =========================
-RunService.Stepped:Connect(function()
-	for _, part in ipairs(character:GetChildren()) do
-		if part:IsA("BasePart") then
-			part.CanCollide = false
+	-- VELOCIDADE
+	humanoid.WalkSpeed = 80
+
+	-- NOCLIP REAL
+	if noclipConnection then
+		noclipConnection:Disconnect()
+	end
+
+	noclipConnection = RunService.Stepped:Connect(function()
+		if character and character.Parent then
+			for _, part in ipairs(character:GetChildren()) do
+				if part:IsA("BasePart") then
+					part.CanCollide = false
+				end
+			end
 		end
-	end
-end)
-
--- =========================
--- SUAS COORDENADAS
--- =========================
-local teleportPoints = {
-	Vector3.new(-347, -6, 113),
-	Vector3.new(-347, -6, 218),
-	Vector3.new(-346, -6, 10),
-	Vector3.new(-347, -6, -97),
-	Vector3.new(-470, -6, -102),
-	Vector3.new(-471, -6, 2),
-	Vector3.new(-470, -6, 114),
-	Vector3.new(-470, -6, 220)
-}
-
-local debounce = false
-
--- =========================
--- TELEPORTE EM SEQUÊNCIA E VOLTA
--- =========================
-local function teleportSequence()
-	if debounce then return end
-	debounce = true
-
-	local originalCFrame = root.CFrame
-
-	for _, pos in ipairs(teleportPoints) do
-		root.CFrame = CFrame.new(pos)
-		task.wait(0.25) -- tempo entre teleports (ajuste se quiser)
-	end
-
-	task.wait(0.25)
-	root.CFrame = originalCFrame
-
-	debounce = false
+	end)
 end
 
--- =========================
--- TECLA K
--- =========================
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if gameProcessed then return end
-	if input.KeyCode == Enum.KeyCode.K then
-		teleportSequence()
-	end
-end)
+-- Primeira vez
+if player.Character then
+	setupCharacter(player.Character)
+end
+
+-- Sempre que respawnar
+player.CharacterAdded:Connect(setupCharacter)
 
 -- =========================
 -- TELEPORTE EM SEQUÊNCIA E VOLTA
 -- =========================
 local function teleportSequence()
-	if debounce then return end
+	if debounce or not root then return end
 	debounce = true
 
 	local originalCFrame = root.CFrame
 
 	for _, pos in ipairs(teleportPoints) do
-		root.CFrame = CFrame.new(pos)
-		task.wait(0.25) -- tempo entre teleports (ajuste se quiser)
+		if root then
+			root.CFrame = CFrame.new(pos)
+			task.wait(0.25)
+		end
 	end
 
 	task.wait(0.25)
-	root.CFrame = originalCFrame
+
+	if root then
+		root.CFrame = originalCFrame
+	end
 
 	debounce = false
 end
