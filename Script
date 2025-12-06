@@ -1,0 +1,38 @@
+-- LocalScript - Teleporte com a tecla K
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+
+-- Espera o personagem carregar
+local character = player.Character or player.CharacterAdded:Wait()
+local root = character:WaitForChild("HumanoidRootPart")
+
+-- Print da posição correta
+print("Posição inicial:", root.Position)
+
+-- Lista de posições
+local teleportPoints = {
+	Vector3.new(-470, -6, 221),
+	Vector3.new(-471, -6, 112)
+}
+
+local index = 1
+
+local function teleport()
+	root.CFrame = CFrame.new(teleportPoints[index])
+
+	index += 1
+	if index > #teleportPoints then
+		index = 1
+	end
+end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+
+	if input.KeyCode == Enum.KeyCode.K then
+		teleport()
+	end
+end)
