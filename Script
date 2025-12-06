@@ -1,18 +1,40 @@
--- LocalScript - Teleporte com a tecla K
+-- LocalScript - Teleporte + Noclip + Velocidade
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 
 -- Espera o personagem carregar
 local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
 local root = character:WaitForChild("HumanoidRootPart")
 
--- Print da posição correta
+-- =========================
+-- VELOCIDADE ALTA
+-- =========================
+humanoid.WalkSpeed = 80 -- padrão é 16, você pode aumentar mais se quiser
+
+-- =========================
+-- NOCLIP
+-- =========================
+RunService.Stepped:Connect(function()
+	for _, part in ipairs(character:GetChildren()) do
+		if part:IsA("BasePart") then
+			part.CanCollide = false
+		end
+	end
+end)
+
+-- =========================
+-- PRINT DA POSIÇÃO
+-- =========================
 print("Posição inicial:", root.Position)
 
--- Lista de posições
+-- =========================
+-- TELEPORTES
+-- =========================
 local teleportPoints = {
 	Vector3.new(-470, -6, 221),
 	Vector3.new(-471, -6, 112)
